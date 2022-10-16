@@ -135,7 +135,7 @@ namespace ATM_Project
                             Console.Clear();
                             break;
                         case 3:
-                            //Ta ut pengar
+                            CashOut(UserName, Users, Account);
                             Console.Clear();
                             break;
                         case 4:
@@ -259,7 +259,7 @@ namespace ATM_Project
                     decimal A2 = Account[IndexUser][SecondCh] + Sum;//Amount to be added to the second choice stored in a variable
                     Account[IndexUser][FirstCh] = A1;//Declaring that the first account has been subtracted the amount stored in "Sum"
                     Account[IndexUser][SecondCh] = A2;//Declaring that the second account has been added the amount stored in "Sum"
-                    Console.WriteLine($"Du har flyttat över {Sum} från ditt {Acc[FirstCh]} till ditt {Acc[SecondCh]}.");
+                    Console.WriteLine($"Du har flyttat över {Sum}kr från ditt {Acc[FirstCh]} till ditt {Acc[SecondCh]}.");
                     Console.WriteLine();
                     Console.WriteLine("Nuvarande saldo på konton");
 
@@ -269,7 +269,7 @@ namespace ATM_Project
                         {
                             Console.Write(Acc[i]);
                             Console.Write(": ");
-                            Console.WriteLine(Account[IndexUser][i]);
+                            Console.WriteLine(Account[IndexUser][i] + "kr");
                         }
                     }
                 }
@@ -280,6 +280,105 @@ namespace ATM_Project
                 Console.Clear();
                 Console.WriteLine("Fel inmatning");
             }
+            Console.ReadKey();
+        }
+        //Method for withdrawing money
+        public static void CashOut(string UserName, string[,] Users, decimal[][] Account)
+        {
+            try
+            {
+                Console.Clear();
+                int IndexUser = ActiveUser(Users, UserName);
+                string[] Acc = { "Lönekonto.", "Sparkonto.", "Semesterkonto.", "Pensionkonto." };
+                string[] AccChoice = { "1 - Lönekonto\n", "2 - Sparkonto\n", "3 - Semestersparande\n", "4 - Pension\n" };
+                Console.WriteLine("Vilket konto vill du ta ut pengar från?");
+                for (int i = 0; i < Users.GetLength(0); i++)
+                {
+                    if (UserName == Users[i, 0])
+                    {
+                        for (int j = 0; j < Account[i].Length; j++)
+                        {
+                            foreach (var item in AccChoice[j])
+                            {
+                                Console.Write(item);
+                            }
+                        }
+                    }
+                }
+                int FirstCh = int.Parse(Console.ReadLine());
+                switch (FirstCh)
+                {
+                    case 1:
+                        FirstCh = 0;
+                        break;
+                    case 2:
+                        FirstCh = 1;
+                        break;
+                    case 3:
+                        FirstCh = 2;
+                        break;
+                    case 4:
+                        FirstCh = 3;
+                        break;
+                }
+                Console.Clear();
+                Console.WriteLine("Hur mycket pengar vill du ta ut?");
+                decimal Sum = decimal.Parse(Console.ReadLine());
+                Console.Clear();
+
+                bool Pin2_Correct = false;
+                int MaxTries = 3;
+
+                while (Pin2_Correct != true && MaxTries != 0)
+                {
+                    Console.WriteLine("Vänligen knappa in Pinkod");
+                    string Pin2 = Console.ReadLine();//New string to check if the Pin matches the accounts Pin
+
+                    if (Pin2 == Users[IndexUser, 1] && MaxTries != 0)//If Pin matches and MaxTries is not 0
+                    {
+                        Console.Clear();
+                        Pin2_Correct = true;//Changes Pin2_Correct bool to true to end the while loop above
+                        if (Sum < Account[IndexUser][FirstCh])//If amount to withdraw is lower than what's available on selected account
+                        {
+                            decimal A1 = Account[IndexUser][FirstCh] - Sum;//Subtracts the amount chosen from chosen account
+                            Account[IndexUser][FirstCh] = A1; //Declares that it's been withdrawn
+                            Console.WriteLine($"Du har tagit ut {Sum}kr ifrån ditt {Acc[FirstCh]}");
+                            Console.WriteLine();
+                            Console.WriteLine("Nuvarade saldo på konton");
+
+                            for (int i = 0; i < Account[IndexUser].Length; i++)
+                            {
+                                if (Account[IndexUser][i] != 0)
+                                {
+                                    Console.Write(Acc[i]);
+                                    Console.Write(": ");
+                                    Console.WriteLine(Account[IndexUser][i]);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Tyvärr, summan du försöker ta ut överskrider summan som finns på kontot");
+                        }
+                    }
+                    else if (Pin2 != Users[IndexUser, 1] && MaxTries != 0)
+                    {
+                        Console.WriteLine("Fel pinkod, försök igen");
+                        MaxTries--;
+                    }
+                    else if (MaxTries == 0)
+                    {
+                        Console.WriteLine("Fel pinkod för många gånger, återgår till start.");
+                    }
+                }
+            }
+            catch
+            {
+                Console.Clear();
+                Console.WriteLine("Fel inmatning");
+            }
+
+
             Console.ReadKey();
         }
     }
